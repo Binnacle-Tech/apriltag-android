@@ -6,7 +6,11 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
-    <style name="PreferencesTheme" parent="android:Theme.Holo">
+    <style name="PreferencesTheme" parent="Theme.AppCompat.DayNight">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="preferenceTheme">@style/PreferenceThemeOverlay</item>
     </style>
 
     <style name="Widget.MyApp.Toolbar.Solid" parent="Widget.AppCompat.ActionBar">

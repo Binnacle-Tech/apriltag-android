@@ -55,7 +55,7 @@
         android:title="Diagnostics"
         android:key="pref_cat_diagnostics">
 
-        <SwitchPreference
+        <SwitchPreferenceCompat
             android:key="diagnostics_enabled"
             android:title="Enable Diagnostics"
             android:summary="Enable additional stats and diagnostics."
