@@ -22,3 +22,13 @@ In Android Studio:
 To facilitate testing, it is useful to have a virtual emulated scene
 with tags present. Follow [these instructions](https://developers.google.com/ar/develop/java/emulator#move_the_virtual_camera)
 to add a picture of your choice to the virtual scene.
+
+
+## Requirements
+
+This project has been modernized for current Android tooling:
+- Android Gradle Plugin 8.5.2 / Gradle 8.7 (requires JDK 17)
+- AndroidX libraries, `compileSdk`/`targetSdk` 34, `minSdk` 21
+- Camera pipeline uses CameraX (`Preview` + `ImageAnalysis`)
+
+Open the project in a recent Android Studio, let it sync, then build and run.
