@@ -1,7 +1,9 @@
 package edu.umich.eecs.april.apriltag;
 
+import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.DashPathEffect;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PorterDuff;
@@ -10,6 +12,8 @@ import android.util.Size;
 import android.util.Log;
 import android.view.TextureView;
 import android.widget.TextView;
+
+import androidx.core.content.ContextCompat;
 
 import java.util.ArrayList;
 import java.util.concurrent.BlockingQueue;
@@ -33,11 +37,21 @@ public class DetectionThread extends Thread {
     private int mFrameCount = 0;
     private long mLastDetectLatency = 0;
 
+    // Binnacle accent contract, resolved from theme tokens (respects light/dark).
+    private final int mColorGood;   // clean decode
+    private final int mColorNow;    // error-corrected: read, but less certain
+    private final int mColorText;   // labels / orientation marker
+
 
 
     public DetectionThread(TextureView textureView, TextView fpsTextView) {
         mTextureView = textureView;
         mFpsTextView = fpsTextView;
+
+        Context ctx = textureView.getContext();
+        mColorGood = ContextCompat.getColor(ctx, R.color.bin_good);
+        mColorNow = ContextCompat.getColor(ctx, R.color.bin_now);
+        mColorText = ContextCompat.getColor(ctx, R.color.bin_text);
         // The overlay sits on top of the camera PreviewView. A TextureView is opaque
         // by default, so its transparent (cleared) regions would render as solid black
         // and hide the camera feed. Blend instead so only the drawn detections show.
@@ -121,21 +135,23 @@ public class DetectionThread extends Thread {
     }
 
     private void renderDetection(ApriltagDetection detection, Canvas canvas) {
-        Paint fillPaint = new Paint();
-        fillPaint.setColor(Color.GREEN);
-        fillPaint.setAlpha(128);
-        fillPaint.setStyle(Paint.Style.FILL);
-
-        Paint borderPaint = new Paint();
-        final int[] borderColors = new int[]{Color.GREEN, Color.WHITE, Color.WHITE, Color.RED};
-        borderPaint.setStyle(Paint.Style.STROKE);
-        borderPaint.setStrokeWidth(10);
-
         double[] points = detection.p;
         if (points == null || points.length != 8) {
             Log.w(TAG, "invalid detection coordinates");
             return;
         }
+
+        // Accent contract: a clean decode is "good" (cyan); an error-corrected
+        // decode is "now" (amber) — read, but less certain. The distinction also
+        // carries a non-colour channel (solid vs dashed border) so it survives the
+        // greyscale test.
+        boolean corrected = detection.hamming > 0;
+        int accent = corrected ? mColorNow : mColorGood;
+
+        Paint fillPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        fillPaint.setColor(accent);
+        fillPaint.setAlpha(90);
+        fillPaint.setStyle(Paint.Style.FILL);
 
         // Convert detection points (analysis-image space) to canvas points.
         float[] xPointsCanvas = new float[4];
@@ -167,17 +183,25 @@ public class DetectionThread extends Thread {
         fillPath.close();
         canvas.drawPath(fillPath, fillPaint);
 
-        // Render stroke outline of detections, thickness scaled to tag size.
-        borderPaint.setStrokeWidth(Math.max(3f, minEdge * 0.06f));
-        int colorIndex = 0;
-        for (int i = 0; i < 4; i++) {
-            Path borderPath = new Path();
-            borderPaint.setColor(borderColors[colorIndex++ % borderColors.length]);
-
-            borderPath.moveTo(xPointsCanvas[i], yPointsCanvas[i]);
-            borderPath.lineTo(xPointsCanvas[(i + 1) % 4], yPointsCanvas[(i + 1) % 4]);
-            canvas.drawPath(borderPath, borderPaint);
+        // Border in the accent colour, thickness scaled to tag size. Corrected
+        // reads use a dashed stroke — the non-colour channel for the distinction.
+        float strokeWidth = Math.max(3f, minEdge * 0.06f);
+        Paint borderPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        borderPaint.setStyle(Paint.Style.STROKE);
+        borderPaint.setStrokeWidth(strokeWidth);
+        borderPaint.setColor(accent);
+        if (corrected) {
+            float dash = Math.max(6f, minEdge * 0.14f);
+            borderPaint.setPathEffect(new DashPathEffect(new float[]{dash, dash}, 0f));
         }
+        canvas.drawPath(fillPath, borderPaint);
+
+        // Orientation marker: a dot at the first corner encodes which way the tag
+        // is turned, without relying on colour to signal it.
+        Paint dotPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        dotPaint.setStyle(Paint.Style.FILL);
+        dotPaint.setColor(mColorText);
+        canvas.drawCircle(xPointsCanvas[0], yPointsCanvas[0], Math.max(4f, strokeWidth * 1.4f), dotPaint);
 
         // Render the tag ID centered in the box, sized to fit, with a dark halo
         // so it stays legible over the tag and any background.
