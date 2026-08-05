@@ -16,6 +16,7 @@
         <item name="android:windowLightStatusBar">@bool/bin_light_status</item>
         <item name="android:fontFamily">@font/bin_ui</item>
         <item name="fontFamily">@font/bin_ui</item>
+        <item name="android:textViewStyle">@style/Widget.Binnacle.TextView</item>
     </style>
 
     <style name="PreferencesTheme" parent="Theme.AppCompat.DayNight">
@@ -30,6 +31,7 @@
         <item name="android:windowLightStatusBar">@bool/bin_light_status</item>
         <item name="android:fontFamily">@font/bin_ui</item>
         <item name="fontFamily">@font/bin_ui</item>
+        <item name="android:textViewStyle">@style/Widget.Binnacle.TextView</item>
         <item name="preferenceTheme">@style/PreferenceThemeOverlay</item>
     </style>
 
@@ -42,10 +44,9 @@
         <item name="colorControlNormal">@color/bin_muted</item>
     </style>
 
-    <style name="TextAppearance.Binnacle.Toolbar.Title" parent="TextAppearance.Widget.AppCompat.Toolbar.Title">
-        <item name="android:fontFamily">@font/bin_display</item>
-        <item name="android:textStyle">bold</item>
-        <item name="android:textColor">@color/bin_text</item>
+    <style name="Widget.Binnacle.TextView" parent="Widget.AppCompat.TextView">
+        <item name="android:fontFamily">@font/bin_ui</item>
+        <item name="fontFamily">@font/bin_ui</item>
     </style>
 
 </resources>

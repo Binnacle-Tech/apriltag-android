@@ -54,9 +54,13 @@ public class ApriltagDetectorActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
-        // Add toolbar/actionbar
+        // Add toolbar/actionbar. The title is a custom view in the layout (so the
+        // display font applies on all API levels), so hide the default title.
         Toolbar myToolbar = findViewById(R.id.toolbar);
         setSupportActionBar(myToolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayShowTitleEnabled(false);
+        }
 
         // Make the screen stay awake
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
