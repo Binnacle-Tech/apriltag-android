@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Binnacle theme (API 21+). Kept identical to values/styles.xml; colours
-     resolve per mode via the token files. -->
+<!-- Binnacle theme (night). Identical to values/styles.xml; the dark token
+     values come from values-night/colors.xml. -->
 <resources>
 
     <style name="AppTheme" parent="Theme.AppCompat.DayNight.NoActionBar">

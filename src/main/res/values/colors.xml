@@ -1,12 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Binnacle design tokens — LIGHT mode. Dark values live in values-night/colors.xml.
+     Accents are named by MEANING, not hue: now=action/focus, good=done/verified,
+     held=paused/idle, stop=error/destructive. -->
 <resources>
-    <color name="colorPrimary">@color/umBlue</color>
-    <color name="colorPrimaryDark">@color/umBlueDark</color>
-    <color name="colorAccent">@color/umMaize</color>
+    <!-- surfaces -->
+    <color name="bin_ink">#FFEEF2F6</color>
+    <color name="bin_panel">#FFFFFFFF</color>
+    <color name="bin_panel_alt">#FFF3F6F9</color>
+    <color name="bin_well">#FFE9EEF3</color>
 
-    <color name="umBlue">#00274c</color>
-    <color name="umMaize">#ffcb05</color>
-    <color name="umBlueDark">#333333</color>
+    <!-- structure -->
+    <color name="bin_line">#FFD4DDE5</color>
+    <color name="bin_line_strong">#FFB9C6D1</color>
 
-    <color name="black_overlay">#66000000</color>
+    <!-- text ramp -->
+    <color name="bin_text">#FF0E1419</color>
+    <color name="bin_muted">#FF4A5A68</color>
+    <color name="bin_caption">#FF65788A</color>
+
+    <!-- accent contract -->
+    <color name="bin_now">#FF8A5D10</color>
+    <color name="bin_now_soft">#FF6E4A0C</color>
+    <color name="bin_good">#FF186059</color>
+    <color name="bin_good_dim">#FF8FBFB9</color>
+    <color name="bin_held">#FF5A6B79</color>
+    <color name="bin_held_dim">#FFA8B6C1</color>
+    <color name="bin_stop">#FFA32C1A</color>
+    <color name="bin_on_now">#FFFFFFFF</color>
 </resources>

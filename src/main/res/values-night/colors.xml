@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Binnacle design tokens — DARK mode (the primary Binnacle surface). -->
+<resources>
+    <!-- surfaces -->
+    <color name="bin_ink">#FF0E1419</color>
+    <color name="bin_panel">#FF151E27</color>
+    <color name="bin_panel_alt">#FF1B2731</color>
+    <color name="bin_well">#FF101922</color>
+
+    <!-- structure -->
+    <color name="bin_line">#FF26333E</color>
+    <color name="bin_line_strong">#FF334353</color>
+
+    <!-- text ramp -->
+    <color name="bin_text">#FFE7EEF4</color>
+    <color name="bin_muted">#FF93A4B2</color>
+    <color name="bin_caption">#FF67798A</color>
+
+    <!-- accent contract -->
+    <color name="bin_now">#FFE8A33D</color>
+    <color name="bin_now_soft">#FFF0C079</color>
+    <color name="bin_good">#FF4FD1C5</color>
+    <color name="bin_good_dim">#FF2E7E77</color>
+    <color name="bin_held">#FF8FA0AE</color>
+    <color name="bin_held_dim">#FF4A5A68</color>
+    <color name="bin_stop">#FFE06C5A</color>
+    <color name="bin_on_now">#FF1A1206</color>
+</resources>
