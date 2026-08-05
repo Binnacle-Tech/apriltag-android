@@ -146,7 +146,16 @@ public class DetectionThread extends Thread {
             yPointsCanvas[i] = p[1];
         }
 
-        // Render filled outline of detections
+        // Shortest on-screen edge of the tag quad — used to scale the border and
+        // text so they stay proportional to how big the tag appears.
+        float minEdge = Float.MAX_VALUE;
+        for (int i = 0; i < 4; i++) {
+            float dx = xPointsCanvas[(i + 1) % 4] - xPointsCanvas[i];
+            float dy = yPointsCanvas[(i + 1) % 4] - yPointsCanvas[i];
+            minEdge = Math.min(minEdge, (float) Math.hypot(dx, dy));
+        }
+
+        // Render translucent fill so the tag stays visible underneath.
         Path fillPath = new Path();
         for (int i = 0; i < 4; i++) {
             if (i == 0) {
@@ -158,7 +167,8 @@ public class DetectionThread extends Thread {
         fillPath.close();
         canvas.drawPath(fillPath, fillPaint);
 
-        // Render stroke outline of detections
+        // Render stroke outline of detections, thickness scaled to tag size.
+        borderPaint.setStrokeWidth(Math.max(3f, minEdge * 0.06f));
         int colorIndex = 0;
         for (int i = 0; i < 4; i++) {
             Path borderPath = new Path();
@@ -169,17 +179,35 @@ public class DetectionThread extends Thread {
             canvas.drawPath(borderPath, borderPaint);
         }
 
-        // Render tag ID in the center of the detection box
-        Paint textPaint = new Paint();
-        textPaint.setColor(Color.WHITE);
-        textPaint.setTextSize(100);
+        // Render the tag ID centered in the box, sized to fit, with a dark halo
+        // so it stays legible over the tag and any background.
         String tagId = String.valueOf(detection.id);
-        float textWidth = textPaint.measureText(tagId);
-        float textHeight = textPaint.getFontMetrics().descent - textPaint.getFontMetrics().ascent;
+        Paint textPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        textPaint.setColor(Color.WHITE);
+        textPaint.setTextAlign(Paint.Align.CENTER);
+        textPaint.setFakeBoldText(true);
+
+        // Fit the number within the box in both height and width.
+        float textSize = Math.max(10f, minEdge * 0.55f);
+        textPaint.setTextSize(textSize);
+        float measured = textPaint.measureText(tagId);
+        float maxWidth = minEdge * 0.85f;
+        if (measured > maxWidth && measured > 0) {
+            textSize = Math.max(10f, textSize * maxWidth / measured);
+            textPaint.setTextSize(textSize);
+        }
+
         float[] center = mapToCanvas(detection.c[0], detection.c[1], canvas);
-        float textX = center[0] - textWidth / 2;
-        float textY = center[1] + textHeight / 2 - textPaint.getFontMetrics().descent;
-        canvas.drawText(tagId, textX, textY, textPaint);
+        Paint.FontMetrics fm = textPaint.getFontMetrics();
+        float baseline = center[1] - (fm.ascent + fm.descent) / 2f; // vertically center
+
+        Paint outlinePaint = new Paint(textPaint);
+        outlinePaint.setStyle(Paint.Style.STROKE);
+        outlinePaint.setColor(Color.BLACK);
+        outlinePaint.setStrokeWidth(Math.max(2f, textSize * 0.14f));
+
+        canvas.drawText(tagId, center[0], baseline, outlinePaint);
+        canvas.drawText(tagId, center[0], baseline, textPaint);
     }
 
     /**
