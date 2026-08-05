@@ -50,13 +50,14 @@ outside the app.
 
 Three faces, three jobs: display = titles, ui = body, **mono = machine data**.
 
-- [ ] Add the five `.ttf` files and font-family resources (→ `res/font/`)
-- [ ] Apply `bin_ui` app-wide and `bin_display` to the toolbar title
+- [x] Bundle the `.ttf` files and font-family resources
+      (→ `res/font/` : `bin_display`, `bin_ui`, `bin_mono`)
+- [x] Apply `bin_ui` app-wide and `bin_display` to the toolbar title
       (→ `res/values*/styles.xml`, `res/layout/main.xml`)
-- [ ] Reserve `bin_mono` for the telemetry readout (used in Phase 3)
-- Full steps in `FONTS.md`.
-- **Gate:** the app name is display; body is ui; nothing machine-data is set in a
-  proportional face yet.
+- [x] `bin_mono` family ready for the telemetry readout (wired up in Phase 3)
+- [x] SIL OFL notices bundled (→ `licenses/`)
+- **Gate:** the app name is display; body is ui; the mono face is reserved for
+  machine data (applied in Phase 3).
 
 ## Phase 2 — The signature: detection overlay accent contract  ·  *colour + "one loud thing"*
 
