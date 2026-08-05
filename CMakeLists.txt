@@ -5,6 +5,10 @@
 cmake_minimum_required(VERSION 3.4.1)
 project(Project)
 
+# Align shared library LOAD segments to 16 KB pages, required for Android 15+
+# / 16 KB page-size devices (Google Play requirement from Nov 1, 2025).
+set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-z,max-page-size=16384")
+
 # Specifies a library name, specifies whether the library is STATIC or
 # SHARED, and provides relative paths to the source code. You can
 # define multiple libraries by adding multiple add.library() commands,
