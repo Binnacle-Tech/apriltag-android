@@ -14,6 +14,8 @@
         <item name="android:statusBarColor">@color/bin_ink</item>
         <item name="android:navigationBarColor">@color/bin_ink</item>
         <item name="android:windowLightStatusBar">@bool/bin_light_status</item>
+        <item name="android:fontFamily">@font/bin_ui</item>
+        <item name="fontFamily">@font/bin_ui</item>
     </style>
 
     <style name="PreferencesTheme" parent="Theme.AppCompat.DayNight">
@@ -26,6 +28,8 @@
         <item name="android:textColorSecondary">@color/bin_muted</item>
         <item name="android:statusBarColor">@color/bin_ink</item>
         <item name="android:windowLightStatusBar">@bool/bin_light_status</item>
+        <item name="android:fontFamily">@font/bin_ui</item>
+        <item name="fontFamily">@font/bin_ui</item>
         <item name="preferenceTheme">@style/PreferenceThemeOverlay</item>
     </style>
 
@@ -36,6 +40,12 @@
     <style name="ThemeOverlay.MyApp.ActionBar" parent="ThemeOverlay.AppCompat.ActionBar">
         <item name="android:textColorPrimary">@color/bin_text</item>
         <item name="colorControlNormal">@color/bin_muted</item>
+    </style>
+
+    <style name="TextAppearance.Binnacle.Toolbar.Title" parent="TextAppearance.Widget.AppCompat.Toolbar.Title">
+        <item name="android:fontFamily">@font/bin_display</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/bin_text</item>
     </style>
 
 </resources>

@@ -59,5 +59,6 @@ Open the gear icon in the toolbar. Changes take effect when you return to the ca
 
 - **App:** originally [`johnjwang/apriltag-android`](https://github.com/johnjwang/apriltag-android), an AprilTag detector demo for Android from the University of Michigan APRIL Robotics Lab. This fork modernizes the build system and camera pipeline.
 - **AprilTag library:** the C sources under `src/main/apriltag/` are from [`AprilRobotics/apriltag`](https://github.com/AprilRobotics/apriltag), Copyright (C) 2013–2016 The Regents of the University of Michigan, developed in the APRIL Robotics Lab under the direction of Edwin Olson. Distributed under the **BSD 2-Clause** license; the original copyright and license notices are retained in the source headers.
+- **Fonts:** Space Grotesk, Inter, and IBM Plex Mono (bundled in `res/font/`), © their respective authors, licensed under the **SIL Open Font License 1.1**. Full notices are in `licenses/`.
 
 Please keep these notices intact in any redistribution.
