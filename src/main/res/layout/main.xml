@@ -1,6 +1,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:orientation="vertical">
 
     <LinearLayout
@@ -11,10 +12,9 @@
             android:layout_height="match_parent"
             android:src="@mipmap/april_lab"
             android:paddingLeft="10dp"
+            android:contentDescription="@string/app_name"
             android:theme="@style/Widget.MyApp.Toolbar.Solid"/>
-        <android.support.v7.widget.Toolbar
-            xmlns:android="http://schemas.android.com/apk/res/android"
-            xmlns:app="http://schemas.android.com/apk/res-auto"
+        <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -30,10 +30,12 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" >
 
-        <SurfaceView
-            android:id="@+id/surfaceView"
+        <androidx.camera.view.PreviewView
+            android:id="@+id/previewView"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            app:implementationMode="compatible"
+            app:scaleType="fitCenter" />
 
         <TextureView
             android:id="@+id/tagView"

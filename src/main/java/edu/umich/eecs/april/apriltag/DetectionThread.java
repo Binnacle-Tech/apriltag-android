@@ -6,7 +6,7 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PorterDuff;
 import android.graphics.SurfaceTexture;
-import android.hardware.Camera;
+import android.util.Size;
 import android.util.Log;
 import android.view.TextureView;
 import android.widget.TextView;
@@ -22,7 +22,10 @@ public class DetectionThread extends Thread {
 
     private final TextView mFpsTextView;
     private long mLastFPSRender = System.currentTimeMillis();
-    private Camera.Size mCameraSize;
+    private Size mCameraSize;
+    // Clockwise rotation (degrees) needed to bring the analysis frame upright,
+    // as reported by CameraX. Used to map detections onto the preview.
+    private volatile int mRotationDegrees = 90;
     private static final int MAX_FRAME_QUEUE_SIZE = 1;
 
     private BlockingQueue<byte[]> mCameraFrameQueue = new LinkedBlockingQueue<>();
@@ -35,6 +38,10 @@ public class DetectionThread extends Thread {
     public DetectionThread(TextureView textureView, TextView fpsTextView) {
         mTextureView = textureView;
         mFpsTextView = fpsTextView;
+        // The overlay sits on top of the camera PreviewView. A TextureView is opaque
+        // by default, so its transparent (cleared) regions would render as solid black
+        // and hide the camera feed. Blend instead so only the drawn detections show.
+        mTextureView.setOpaque(false);
         mTextureView.setSurfaceTextureListener(new TextureView.SurfaceTextureListener() {
             @Override
             public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
@@ -63,8 +70,9 @@ public class DetectionThread extends Thread {
         mCameraFrameQueue = null;
     }
 
-    public void enqueueCameraFrame(byte[] data, Camera.Size cameraSize) throws InterruptedException {
-        if (mCameraSize == null || mCameraSize.width != cameraSize.width || mCameraSize.height != cameraSize.height) {
+    public void enqueueCameraFrame(byte[] data, Size cameraSize, int rotationDegrees) throws InterruptedException {
+        mRotationDegrees = rotationDegrees;
+        if (mCameraSize == null || mCameraSize.getWidth() != cameraSize.getWidth() || mCameraSize.getHeight() != cameraSize.getHeight()) {
             mCameraFrameQueue.clear();
             mCameraSize = cameraSize;
             Log.w(TAG, "Camera size changed during preview");
@@ -103,9 +111,9 @@ public class DetectionThread extends Thread {
         }
     }
 
-    private ArrayList<ApriltagDetection> processCameraFrame(byte[] data, Camera.Size cameraSize)  {
+    private ArrayList<ApriltagDetection> processCameraFrame(byte[] data, Size cameraSize)  {
         try {
-            return ApriltagNative.apriltag_detect_yuv(data, cameraSize.width, cameraSize.height);
+            return ApriltagNative.apriltag_detect_yuv(data, cameraSize.getWidth(), cameraSize.getHeight());
         } catch (Exception e) {
             Log.e(TAG, "Unhandled exception when detecting tags: " + e);
             return new ArrayList<>();
@@ -123,21 +131,19 @@ public class DetectionThread extends Thread {
         borderPaint.setStyle(Paint.Style.STROKE);
         borderPaint.setStrokeWidth(10);
 
-        float scaleDetectionX = (float)(canvas.getHeight()) / mCameraSize.width; // Converts detection x to render y
-        float scaleDetectionY = (float)(canvas.getWidth()) / mCameraSize.height; // Converts detection y to render x (still needs offset)
-
         double[] points = detection.p;
         if (points == null || points.length != 8) {
             Log.w(TAG, "invalid detection coordinates");
             return;
         }
 
-        // Convert detection points to canvas points
+        // Convert detection points (analysis-image space) to canvas points.
         float[] xPointsCanvas = new float[4];
         float[] yPointsCanvas = new float[4];
         for (int i = 0; i < 4; i++) {
-            xPointsCanvas[i] = (float) (canvas.getWidth() - points[i * 2 + 1] * scaleDetectionY);
-            yPointsCanvas[i] = (float) (points[i * 2] * scaleDetectionX);
+            float[] p = mapToCanvas(points[i * 2], points[i * 2 + 1], canvas);
+            xPointsCanvas[i] = p[0];
+            yPointsCanvas[i] = p[1];
         }
 
         // Render filled outline of detections
@@ -170,9 +176,39 @@ public class DetectionThread extends Thread {
         String tagId = String.valueOf(detection.id);
         float textWidth = textPaint.measureText(tagId);
         float textHeight = textPaint.getFontMetrics().descent - textPaint.getFontMetrics().ascent;
-        float textX = (float) (canvas.getWidth() - detection.c[1] * scaleDetectionY - textWidth / 2);
-        float textY = (float) (detection.c[0] * scaleDetectionX + textHeight / 2 - textPaint.getFontMetrics().descent);
+        float[] center = mapToCanvas(detection.c[0], detection.c[1], canvas);
+        float textX = center[0] - textWidth / 2;
+        float textY = center[1] + textHeight / 2 - textPaint.getFontMetrics().descent;
         canvas.drawText(tagId, textX, textY, textPaint);
+    }
+
+    /**
+     * Map a point from analysis-image coordinates onto the overlay canvas so it
+     * lines up with the CameraX PreviewView. Applies the frame rotation, then a
+     * uniform fit-center scale + centering — matching PreviewView's fitCenter
+     * scaleType (back camera, no mirroring).
+     */
+    private float[] mapToCanvas(double x, double y, Canvas canvas) {
+        int imgW = mCameraSize.getWidth();
+        int imgH = mCameraSize.getHeight();
+        int r = ((mRotationDegrees % 360) + 360) % 360;
+
+        double xu, yu;   // upright-image coordinates
+        int upW, upH;    // upright-image dimensions
+        switch (r) {
+            case 90:  xu = imgH - y; yu = x;         upW = imgH; upH = imgW; break;
+            case 180: xu = imgW - x; yu = imgH - y;  upW = imgW; upH = imgH; break;
+            case 270: xu = y;        yu = imgW - x;  upW = imgH; upH = imgW; break;
+            default:  xu = x;        yu = y;         upW = imgW; upH = imgH; break; // 0
+        }
+
+        int cw = canvas.getWidth();
+        int ch = canvas.getHeight();
+        float scale = Math.min((float) cw / upW, (float) ch / upH); // fitCenter
+        float offsetX = (cw - upW * scale) / 2f;
+        float offsetY = (ch - upH * scale) / 2f;
+
+        return new float[]{ offsetX + (float) xu * scale, offsetY + (float) yu * scale };
     }
 
     private void renderDetections(ArrayList<ApriltagDetection> detections) {
