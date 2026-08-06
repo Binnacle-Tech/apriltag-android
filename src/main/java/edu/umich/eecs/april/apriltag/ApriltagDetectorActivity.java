@@ -4,11 +4,8 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
-import android.graphics.Typeface;
 import android.os.Bundle;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -135,18 +132,15 @@ public class ApriltagDetectorActivity extends AppCompatActivity {
                 decimation, sigma, nthreads, tagFamily));
         ApriltagNative.apriltag_init(tagFamily, max_hamming_error, decimation, sigma, nthreads);
 
-        // DIAGNOSTICS
-        findViewById(R.id.detectionFpsTextView).setVisibility(diagnosticsEnabled ? View.VISIBLE : View.INVISIBLE);
-        findViewById(R.id.previewFpsTextView).setVisibility(diagnosticsEnabled ? View.VISIBLE : View.INVISIBLE);
+        // DIAGNOSTICS — the telemetry well is machine data; show it only when enabled.
+        findViewById(R.id.telemetryWell).setVisibility(diagnosticsEnabled ? View.VISIBLE : View.GONE);
         TextView tagFamilyText = findViewById(R.id.tagFamily);
-        stylizeText(tagFamilyText);
-        tagFamilyText.setText("Tag Family: " + tagFamily.substring(3));
+        tagFamilyText.setText("Tag · " + tagFamily.substring(3));
 
         // THREAD INIT
         // Start the detection process on a separate thread
         android.view.TextureView detectionSurface = findViewById(R.id.tagView);
         TextView detectionFpsTextView = findViewById(R.id.detectionFpsTextView);
-        stylizeText(detectionFpsTextView);
         mDetectionThread = new DetectionThread(detectionSurface, detectionFpsTextView);
         mDetectionThread.initialize();
         mDetectionThread.start();
@@ -154,15 +148,8 @@ public class ApriltagDetectorActivity extends AppCompatActivity {
         // Start the CameraX preview + analysis pipeline
         PreviewView previewView = findViewById(R.id.previewView);
         TextView previewFpsTextView = findViewById(R.id.previewFpsTextView);
-        stylizeText(previewFpsTextView);
         mCameraController = new CameraController(this, previewView, mDetectionThread, previewFpsTextView);
         mCameraController.start(this);
-    }
-
-    private void stylizeText(TextView textView) {
-        textView.setTextColor(Color.GREEN);
-        textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
-        textView.setTypeface(textView.getTypeface(), Typeface.BOLD);
     }
 
     @Override

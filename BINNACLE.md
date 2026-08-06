@@ -77,13 +77,13 @@ The live overlay is this app's **one loud thing** — make it speak the contract
 
 ## Phase 3 — Telemetry as a "well"  ·  *show the work + typography*
 
-- [ ] Move FPS / latency / tag-family text into a recessed **well** panel
-      (rounded rect, `bin_well` fill, `bin_line` border) anchored bottom-left
-      → `res/layout/main.xml`, `DetectionThread`/activity text setup
-- [ ] Render the numbers in **`bin_mono`**, muted label + text ramp (drop the
-      hard-coded green in `stylizeText()`)
-- [ ] Style the tag-family readout as a **status pill** (eyebrow label, tracked
-      uppercase) rather than plain green text
+- [x] Move FPS / latency into a recessed **well** panel (`@drawable/bin_well_panel`,
+      `bin_well` fill + `bin_line` border) anchored bottom-left, shown only when
+      diagnostics are enabled → `res/layout/main.xml`
+- [x] Render the numbers in **`bin_mono`** on the text ramp; removed the
+      hard-coded green `stylizeText()`
+- [x] Tag-family readout is now a **status pill** (`@drawable/bin_pill`, eyebrow:
+      uppercase, tracked, muted) → `res/layout/main.xml`, activity sets "Tag · <fam>"
 - **Gate:** machine data is mono and lives in one clearly-bounded panel.
 
 ## Phase 4 — Fail loud, gate clearly  ·  *fail-loud tenet + glyphs*
