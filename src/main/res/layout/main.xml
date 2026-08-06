@@ -118,6 +118,65 @@
                 android:text="tag36h11" />
         </LinearLayout>
 
+        <!-- Stop state: shown when camera access is blocked or the camera fails to
+             open. Fail loud, gate clearly. -->
+        <LinearLayout
+            android:id="@+id/stopState"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/bin_ink"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="24dp"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bin_card"
+                android:gravity="center_horizontal"
+                android:orientation="vertical"
+                android:padding="24dp">
+
+                <ImageView
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:src="@drawable/ic_bin_failed"
+                    android:contentDescription="@null" />
+
+                <TextView
+                    android:id="@+id/stopStateTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:fontFamily="@font/bin_display"
+                    android:textStyle="bold"
+                    android:textColor="@color/bin_text"
+                    android:textSize="18sp"
+                    android:text="Camera unavailable" />
+
+                <TextView
+                    android:id="@+id/stopStateMessage"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:gravity="center"
+                    android:maxWidth="300dp"
+                    android:textColor="@color/bin_muted"
+                    android:textSize="14sp"
+                    android:text="Camera access is needed to detect AprilTags." />
+
+                <Button
+                    android:id="@+id/stopStateButton"
+                    style="@style/Widget.AppCompat.Button.Colored"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:textColor="@color/bin_on_now"
+                    android:text="Grant camera access" />
+            </LinearLayout>
+        </LinearLayout>
+
     </FrameLayout>
 
 </LinearLayout>

@@ -4,12 +4,15 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -31,6 +34,7 @@ public class ApriltagDetectorActivity extends AppCompatActivity {
 
     private static final int MY_PERMISSIONS_REQUEST_CAMERA = 77;
     private int has_camera_permissions = 0;
+    private boolean mAskedForCamera = false;
 
     private void verifyPreferences() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -65,13 +69,41 @@ public class ApriltagDetectorActivity extends AppCompatActivity {
         // Ensure we have permission to use the camera
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            // Assume user knows enough about the app to know why we need the camera, just ask for permission
+            requestCameraAccess();
+        } else {
+            this.has_camera_permissions = 1;
+        }
+    }
+
+    /** Request the camera permission, or send the user to Settings if it was
+     *  permanently denied. */
+    private void requestCameraAccess() {
+        if (!mAskedForCamera
+                || ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA)) {
+            mAskedForCamera = true;
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.CAMERA},
                     MY_PERMISSIONS_REQUEST_CAMERA);
         } else {
-            this.has_camera_permissions = 1;
+            // Permanently denied — the system dialog won't appear, so open Settings.
+            Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                    Uri.fromParts("package", getPackageName(), null));
+            startActivity(intent);
         }
+    }
+
+    /** Show the stop-state card over the preview. */
+    private void showStopState(String title, String message, String buttonText, Runnable action) {
+        ((TextView) findViewById(R.id.stopStateTitle)).setText(title);
+        ((TextView) findViewById(R.id.stopStateMessage)).setText(message);
+        Button button = findViewById(R.id.stopStateButton);
+        button.setText(buttonText);
+        button.setOnClickListener(v -> action.run());
+        findViewById(R.id.stopState).setVisibility(View.VISIBLE);
+    }
+
+    private void hideStopState() {
+        findViewById(R.id.stopState).setVisibility(View.GONE);
     }
 
     /** Release the camera when the application is exited */
@@ -112,11 +144,15 @@ public class ApriltagDetectorActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
 
-        // Check permissions
+        // Check permissions — fail loud, gate clearly.
         if (this.has_camera_permissions == 0) {
             Log.w(TAG, "Missing camera permissions.");
+            showStopState("Camera access needed",
+                    "AprilTag Detector needs the camera to find and read tags.",
+                    "Grant camera access", this::requestCameraAccess);
             return;
         }
+        hideStopState();
 
         // DETECTION INIT
         // Re-initialize the Apriltag detector as settings may have changed
@@ -149,6 +185,11 @@ public class ApriltagDetectorActivity extends AppCompatActivity {
         PreviewView previewView = findViewById(R.id.previewView);
         TextView previewFpsTextView = findViewById(R.id.previewFpsTextView);
         mCameraController = new CameraController(this, previewView, mDetectionThread, previewFpsTextView);
+        mCameraController.setOnErrorListener(message ->
+                showStopState("Camera unavailable", message, "Retry", () -> {
+                    onPause();
+                    onResume();
+                }));
         mCameraController.start(this);
     }
 
@@ -194,6 +235,9 @@ public class ApriltagDetectorActivity extends AppCompatActivity {
             } else {
                 Log.i(TAG, "App DENIED camera permissions");
                 this.has_camera_permissions = 0;
+                showStopState("Camera access needed",
+                        "AprilTag Detector needs the camera to find and read tags.",
+                        "Grant camera access", this::requestCameraAccess);
             }
         }
     }

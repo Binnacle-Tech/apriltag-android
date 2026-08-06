@@ -44,9 +44,15 @@ public class CameraController {
 
     private ProcessCameraProvider mCameraProvider;
     private ExecutorService mAnalysisExecutor;
+    private OnErrorListener mErrorListener;
 
     private long mLastRender = System.currentTimeMillis();
     private int mFrameCount = 0;
+
+    /** Notified (on the main thread) when the camera can't be opened or bound. */
+    public interface OnErrorListener {
+        void onError(String message);
+    }
 
     public CameraController(Context context, PreviewView previewView,
                             DetectionThread detectionThread, TextView fpsTextView) {
@@ -54,6 +60,16 @@ public class CameraController {
         mPreviewView = previewView;
         mDetectionThread = detectionThread;
         mFpsTextView = fpsTextView;
+    }
+
+    public void setOnErrorListener(OnErrorListener listener) {
+        mErrorListener = listener;
+    }
+
+    private void reportError(String message) {
+        if (mErrorListener != null) {
+            mErrorListener.onError(message);
+        }
     }
 
     /** Asynchronously acquire the camera and bind the preview + analysis use cases. */
@@ -67,6 +83,7 @@ public class CameraController {
                 bindUseCases(lifecycleOwner);
             } catch (Exception e) {
                 Log.e(TAG, "Couldn't open camera: " + e.getMessage());
+                reportError("Couldn't open the camera. Another app may be using it.");
             }
         }, ContextCompat.getMainExecutor(mContext));
     }
@@ -103,8 +120,13 @@ public class CameraController {
                 .requireLensFacing(CameraSelector.LENS_FACING_BACK)
                 .build();
 
-        mCameraProvider.bindToLifecycle(lifecycleOwner, cameraSelector, preview, imageAnalysis);
-        Log.i(TAG, "Camera preview start");
+        try {
+            mCameraProvider.bindToLifecycle(lifecycleOwner, cameraSelector, preview, imageAnalysis);
+            Log.i(TAG, "Camera preview start");
+        } catch (Exception e) {
+            Log.e(TAG, "Couldn't bind camera use cases: " + e.getMessage());
+            reportError("Couldn't start the camera on this device.");
+        }
     }
 
     private void analyze(@NonNull ImageProxy image) {

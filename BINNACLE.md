@@ -88,20 +88,18 @@ The live overlay is this app's **one loud thing** — make it speak the contract
 
 ## Phase 4 — Fail loud, gate clearly  ·  *fail-loud tenet + glyphs*
 
-- [ ] Camera permission denied → a visible **stop** state: a card with the stop
-      glyph, a one-line reason, and a "Grant camera access" button (not just a
-      `Log.w`)
-      → `ApriltagDetectorActivity` (replace the silent `has_camera_permissions == 0`
-      path), new `res/layout` for the state
-- [ ] Camera-open / bind failure → same treatment (surface `CameraController`
-      errors to the UI)
+- [x] Camera permission denied → a visible **stop** state card (stop glyph,
+      reason, "Grant camera access" button that requests, or opens Settings if
+      permanently denied) → `ApriltagDetectorActivity`, `res/layout/main.xml`
+- [x] Camera-open / bind failure → same card via `CameraController.OnErrorListener`
+      ("Retry")
 - **Gate:** with the camera permission revoked, the screen explains itself and
   offers the fix.
 
 ## Phase 5 — Glyphs (the non-colour channel)  ·  *colour + component kit*
 
-- [ ] Port the four state glyphs from `binnacle-glyphs.svg` to vector drawables
-      (`gl_running`, `gl_done`, `gl_held`, `gl_failed`) → `res/drawable/`
+- [x] `gl-failed` ported → `res/drawable/ic_bin_failed.xml` (used by the stop card)
+- [ ] Port the remaining state glyphs (`gl_running`, `gl_done`, `gl_held`) → `res/drawable/`
 - [ ] Use them wherever a state shows: the stop card (Phase 4), the tag-family /
       status pill, any future status
 - **Gate:** every state on screen pairs an accent with its glyph.
